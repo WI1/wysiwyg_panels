@@ -1,0 +1,6 @@
+name = WYSIWYG Panels
+description = Make WYSIWYG works with Panels and og_panels. (http://drupal.org/node/235764)
+package = User interface
+core = 6.x
+version = "6.x-2.3"
+dependencies[] = panels

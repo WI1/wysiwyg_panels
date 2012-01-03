@@ -1,0 +1,50 @@
+<?php
+/**
+ * @file
+ * Make WYSIWYG works with Panels.
+ */
+
+/**
+ * Implementation of hook_init().
+ */
+function wysiwyg_panels_init() {
+  // TODO: find a better place to put this stuff.
+if ((arg(0) == 'node' && is_numeric(arg(1)) && arg(2) == 'panel_content') 
+	|| (arg(0) == 'admin' && arg(1) == 'build' && arg(2) == 'panel-mini' && arg(4) == 'edit-content') 
+	|| (arg(0) == 'admin' && arg(1) == 'build' && arg(2) == 'pages' && arg(4) == 'operation' && arg(8) == 'content') 
+	|| (arg(0) == 'node' && is_numeric(arg(1)) && arg(2) == 'og_panels' && arg(4) == 'panel_content')) 
+{
+    if (module_exists('wysiwyg')) {
+      foreach (filter_formats() as $format => $object) {
+        if ($profile = wysiwyg_get_profile($format)) {
+          $editor = $profile->editor;
+          $status = (int) wysiwyg_user_get_status($profile);
+          if (isset($profile->settings['show_toggle'])) {
+            $toggle = (int) $profile->settings['show_toggle'];
+          }
+          // Check editor theme (and reset it if not/no longer available).
+          $theme = wysiwyg_get_editor_themes($profile, (isset($profile->settings['theme']) ? $profile->settings['theme'] : ''));
+
+          // Add plugin settings (first) for this input format.
+          wysiwyg_add_plugin_settings($profile);
+          // Add profile settings for this input format.
+          wysiwyg_add_editor_settings($profile, $theme);
+        }
+      }
+    }
+
+    drupal_add_js(drupal_get_path('module', 'wysiwyg_panels') . '/wysiwyg_panels.js');
+  }
+}
+
+/**
+ * Implementation of hook_form_alter().
+ */
+function wysiwyg_panels_form_alter(&$form, $form_state, $form_id) {
+  if ($form_id == 'panels_edit_display_form') {
+    $form['body'] = array(
+      '#type' => 'textarea',
+      '#weight' => 999,
+    );
+  }
+}
